@@ -60,18 +60,15 @@ export default function Dashboard() {
         });
         // Create alert if risk is high
         if (result.riskLevel === 'High' || result.riskLevel === 'Critical') {
-          supabase.from('alerts').insert({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (supabase.from('alerts') as any).insert({
             user_id: user.id,
             city_name: city,
             disease_name: result.disease,
             risk_level: result.riskLevel,
             severity: result.riskLevel === 'Critical' ? 'Critical' : 'Warning',
             key_factors: result.keyFactors,
-            parameter_data: params as Record<string, number>,
-          } as Parameters<typeof supabase.from<'alerts'>>[0] extends never ? never : {
-            user_id: string; city_name: string; disease_name: string;
-            risk_level: string; severity: string; key_factors: string[];
-            parameter_data: Record<string, number>;
+            parameter_data: params,
           });
         }
       }
