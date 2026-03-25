@@ -67,7 +67,11 @@ export default function Dashboard() {
             risk_level: result.riskLevel,
             severity: result.riskLevel === 'Critical' ? 'Critical' : 'Warning',
             key_factors: result.keyFactors,
-            parameter_data: params as unknown as object,
+            parameter_data: params as Record<string, number>,
+          } as Parameters<typeof supabase.from<'alerts'>>[0] extends never ? never : {
+            user_id: string; city_name: string; disease_name: string;
+            risk_level: string; severity: string; key_factors: string[];
+            parameter_data: Record<string, number>;
           });
         }
       }
