@@ -14,7 +14,237 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      alerts: {
+        Row: {
+          city_name: string
+          created_at: string | null
+          disease_name: string
+          id: string
+          is_dismissed: boolean | null
+          is_read: boolean | null
+          key_factors: string[] | null
+          parameter_data: Json | null
+          risk_level: string
+          severity: string
+          user_id: string
+        }
+        Insert: {
+          city_name: string
+          created_at?: string | null
+          disease_name: string
+          id?: string
+          is_dismissed?: boolean | null
+          is_read?: boolean | null
+          key_factors?: string[] | null
+          parameter_data?: Json | null
+          risk_level: string
+          severity: string
+          user_id: string
+        }
+        Update: {
+          city_name?: string
+          created_at?: string | null
+          disease_name?: string
+          id?: string
+          is_dismissed?: boolean | null
+          is_read?: boolean | null
+          key_factors?: string[] | null
+          parameter_data?: Json | null
+          risk_level?: string
+          severity?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          city_context: string | null
+          content: string
+          created_at: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          city_context?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          city_context?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      prediction_history: {
+        Row: {
+          city_name: string
+          coliform: number | null
+          confidence_score: number | null
+          created_at: string | null
+          dissolved_oxygen: number | null
+          id: string
+          ph: number | null
+          predicted_disease: string | null
+          rainfall: number | null
+          raw_data: Json | null
+          risk_level: string | null
+          temperature: number | null
+          turbidity: number | null
+          user_id: string
+          water_quality_index: number | null
+        }
+        Insert: {
+          city_name: string
+          coliform?: number | null
+          confidence_score?: number | null
+          created_at?: string | null
+          dissolved_oxygen?: number | null
+          id?: string
+          ph?: number | null
+          predicted_disease?: string | null
+          rainfall?: number | null
+          raw_data?: Json | null
+          risk_level?: string | null
+          temperature?: number | null
+          turbidity?: number | null
+          user_id: string
+          water_quality_index?: number | null
+        }
+        Update: {
+          city_name?: string
+          coliform?: number | null
+          confidence_score?: number | null
+          created_at?: string | null
+          dissolved_oxygen?: number | null
+          id?: string
+          ph?: number | null
+          predicted_disease?: string | null
+          rainfall?: number | null
+          raw_data?: Json | null
+          risk_level?: string | null
+          temperature?: number | null
+          turbidity?: number | null
+          user_id?: string
+          water_quality_index?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          id: string
+          theme: string | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          id: string
+          theme?: string | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          id?: string
+          theme?: string | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      user_cities: {
+        Row: {
+          city_name: string
+          country: string | null
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          is_favorite: boolean | null
+          latitude: number | null
+          longitude: number | null
+          user_id: string
+        }
+        Insert: {
+          city_name: string
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          is_favorite?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          user_id: string
+        }
+        Update: {
+          city_name?: string
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          is_favorite?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      water_quality_snapshots: {
+        Row: {
+          city_name: string
+          coliform: number | null
+          created_at: string | null
+          dissolved_oxygen: number | null
+          id: string
+          ph: number | null
+          rainfall: number | null
+          risk_level: string | null
+          snapshot_date: string
+          temperature: number | null
+          turbidity: number | null
+          user_id: string
+        }
+        Insert: {
+          city_name: string
+          coliform?: number | null
+          created_at?: string | null
+          dissolved_oxygen?: number | null
+          id?: string
+          ph?: number | null
+          rainfall?: number | null
+          risk_level?: string | null
+          snapshot_date: string
+          temperature?: number | null
+          turbidity?: number | null
+          user_id: string
+        }
+        Update: {
+          city_name?: string
+          coliform?: number | null
+          created_at?: string | null
+          dissolved_oxygen?: number | null
+          id?: string
+          ph?: number | null
+          rainfall?: number | null
+          risk_level?: string | null
+          snapshot_date?: string
+          temperature?: number | null
+          turbidity?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
