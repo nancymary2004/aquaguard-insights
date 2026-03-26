@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useTheme, THEMES } from '@/contexts/ThemeContext';
 import { simulateWaterParameters, predictDisease } from '@/lib/predictionEngine';
 import jsPDF from 'jspdf';
+import CitiesRiskChart from '@/components/dashboard/CitiesRiskChart';
 
 interface City {
   id: string;
@@ -227,6 +228,9 @@ export default function Profile() {
               <p>No cities added yet. Add your first city above!</p>
             </div>
           )}
+
+          {/* Risk Bar Chart */}
+          {cities.length >= 2 && <CitiesRiskChart cities={cities} />}
         </motion.div>
       )}
 
