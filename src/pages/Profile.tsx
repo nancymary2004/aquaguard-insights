@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useTheme, THEMES } from '@/contexts/ThemeContext';
 import { simulateWaterParameters, predictDisease } from '@/lib/predictionEngine';
 import jsPDF from 'jspdf';
+import CitiesRiskChart from '@/components/dashboard/CitiesRiskChart';
 
 interface City {
   id: string;
