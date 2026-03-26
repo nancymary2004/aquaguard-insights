@@ -30,9 +30,11 @@ export default function Dashboard() {
   const [cityInput, setCityInput] = useState('');
   const [savedCities, setSavedCities] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   const [history, setHistory] = useState<ReturnType<typeof generate7DayHistory>>([]);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const dashboardRef = useRef<HTMLDivElement>(null);
 
   const runPrediction = (city: string) => {
     setLoading(true);
