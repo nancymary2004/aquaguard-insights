@@ -228,6 +228,9 @@ export default function Profile() {
               <p>No cities added yet. Add your first city above!</p>
             </div>
           )}
+
+          {/* Risk Bar Chart */}
+          {cities.length >= 2 && <CitiesRiskChart cities={cities} />}
         </motion.div>
       )}
 
