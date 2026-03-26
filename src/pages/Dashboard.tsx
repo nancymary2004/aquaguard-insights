@@ -5,8 +5,8 @@ import {
   AreaChart, Area
 } from 'recharts';
 import {
-  Droplets, MapPin, RefreshCw, TrendingUp, TrendingDown, AlertTriangle,
-  Plus, Star, Activity, Thermometer, CloudRain, Wind
+  Droplets, MapPin, RefreshCw, AlertTriangle,
+  Plus, Activity, Thermometer, CloudRain, Wind, Download
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
