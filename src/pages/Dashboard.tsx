@@ -121,9 +121,22 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-foreground">Water Quality Dashboard</h1>
           <p className="text-muted-foreground text-sm">Real-time disease risk monitoring</p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <RefreshCw className="w-3.5 h-3.5" />
-          Updated {lastUpdated.toLocaleTimeString()}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <RefreshCw className="w-3.5 h-3.5" />
+            Updated {lastUpdated.toLocaleTimeString()}
+          </div>
+          {prediction && (
+            <button
+              onClick={() => exportDashboardPDF(selectedCity, prediction)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98]"
+              style={{ background: 'hsl(var(--primary))' }}
+              title={`Export ${selectedCity} report as PDF`}
+            >
+              <Download className="w-4 h-4" />
+              Export PDF
+            </button>
+          )}
         </div>
       </motion.div>
 
