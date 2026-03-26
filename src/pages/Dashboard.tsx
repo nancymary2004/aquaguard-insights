@@ -5,12 +5,13 @@ import {
   AreaChart, Area
 } from 'recharts';
 import {
-  Droplets, MapPin, RefreshCw, TrendingUp, TrendingDown, AlertTriangle,
-  Plus, Star, Activity, Thermometer, CloudRain, Wind
+  Droplets, MapPin, RefreshCw, AlertTriangle,
+  Plus, Activity, Thermometer, CloudRain, Wind, Download
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { simulateWaterParameters, predictDisease, generate7DayHistory, PredictionResult } from '@/lib/predictionEngine';
+import { exportDashboardPDF } from '@/lib/exportPdf';
 import RiskGauge from '@/components/dashboard/RiskGauge';
 import CityHeatmap from '@/components/dashboard/CityHeatmap';
 
@@ -120,9 +121,22 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-foreground">Water Quality Dashboard</h1>
           <p className="text-muted-foreground text-sm">Real-time disease risk monitoring</p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <RefreshCw className="w-3.5 h-3.5" />
-          Updated {lastUpdated.toLocaleTimeString()}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <RefreshCw className="w-3.5 h-3.5" />
+            Updated {lastUpdated.toLocaleTimeString()}
+          </div>
+          {prediction && (
+            <button
+              onClick={() => exportDashboardPDF(selectedCity, prediction)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98]"
+              style={{ background: 'hsl(var(--primary))' }}
+              title={`Export ${selectedCity} report as PDF`}
+            >
+              <Download className="w-4 h-4" />
+              Export PDF
+            </button>
+          )}
         </div>
       </motion.div>
 
