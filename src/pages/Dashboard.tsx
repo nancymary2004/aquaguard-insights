@@ -6,12 +6,12 @@ import {
 } from 'recharts';
 import {
   Droplets, MapPin, RefreshCw, AlertTriangle,
-  Plus, Activity, Thermometer, CloudRain, Wind, Download
+  Plus, Activity, Thermometer, CloudRain, Wind, Download, Loader2
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { simulateWaterParameters, predictDisease, generate7DayHistory, PredictionResult } from '@/lib/predictionEngine';
-import { exportDashboardPDF } from '@/lib/exportPdf';
+import { exportDashboardVisualPDF } from '@/lib/exportPdf';
 import RiskGauge from '@/components/dashboard/RiskGauge';
 import CityHeatmap from '@/components/dashboard/CityHeatmap';
 
