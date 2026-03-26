@@ -116,7 +116,7 @@ export default function Dashboard() {
   ] : [];
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
+    <div ref={dashboardRef} className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -130,13 +130,14 @@ export default function Dashboard() {
           </div>
           {prediction && (
             <button
-              onClick={() => exportDashboardPDF(selectedCity, prediction)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98]"
+              onClick={() => exportDashboardVisualPDF(dashboardRef, selectedCity, () => setExporting(true), () => setExporting(false))}
+              disabled={exporting}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
               style={{ background: 'hsl(var(--primary))' }}
-              title={`Export ${selectedCity} report as PDF`}
+              title={`Export ${selectedCity} dashboard as PDF`}
             >
-              <Download className="w-4 h-4" />
-              Export PDF
+              {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {exporting ? 'Exporting…' : 'Export PDF'}
             </button>
           )}
         </div>
