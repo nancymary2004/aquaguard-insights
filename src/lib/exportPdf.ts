@@ -1,144 +1,67 @@
 import jsPDF from 'jspdf';
-import { PredictionResult } from './predictionEngine';
+import html2canvas from 'html2canvas';
 
-const RISK_COLORS: Record<string, [number, number, number]> = {
-  Low: [34, 197, 94],
-  Medium: [245, 158, 11],
-  High: [239, 68, 68],
-  Critical: [185, 28, 28],
-};
+export async function exportDashboardVisualPDF(
+  containerRef: React.RefObject<HTMLDivElement>,
+  city: string,
+  onStart?: () => void,
+  onDone?: () => void
+) {
+  if (!containerRef.current) return;
+  onStart?.();
 
-export function exportDashboardPDF(city: string, prediction: PredictionResult) {
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const pw = doc.internal.pageSize.getWidth();
-  const ph = doc.internal.pageSize.getHeight();
-  const margin = 20;
-  let y = 0;
+  try {
+    // Capture the full scrollable content
+    const el = containerRef.current;
+    const canvas = await html2canvas(el, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: null, // preserve theme background
+      scrollY: -window.scrollY,
+      windowWidth: el.scrollWidth,
+      windowHeight: el.scrollHeight,
+    });
 
-  // ── Header bar ──────────────────────────────────────────────
-  doc.setFillColor(14, 116, 144); // teal
-  doc.rect(0, 0, pw, 40, 'F');
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
 
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.text('Water-Borne Disease Prediction Report', pw / 2, 16, { align: 'center' });
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`City: ${city}   |   Generated: ${new Date().toLocaleString()}`, pw / 2, 28, { align: 'center' });
+    const canvasW = canvas.width;
+    const canvasH = canvas.height;
 
-  y = 52;
+    // How many mm does 1 canvas pixel represent?
+    const mmPerPx = pdfW / canvasW;
+    const totalImgHmm = canvasH * mmPerPx;
 
-  // ── Risk Summary card ────────────────────────────────────────
-  const rc = RISK_COLORS[prediction.riskLevel] ?? [100, 100, 100];
-  doc.setFillColor(rc[0], rc[1], rc[2]);
-  doc.roundedRect(margin, y, pw - margin * 2, 28, 4, 4, 'F');
+    let yOffset = 0; // mm printed so far
+    let pageNum = 0;
 
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.text(`Primary Risk: ${prediction.disease}`, margin + 6, y + 10);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'normal');
-  doc.text(
-    `Risk Level: ${prediction.riskLevel}   |   Confidence: ${prediction.confidenceScore}%   |   WQI: ${prediction.waterQualityIndex.toFixed(1)}`,
-    margin + 6,
-    y + 20
-  );
+    while (yOffset < totalImgHmm) {
+      if (pageNum > 0) pdf.addPage();
 
-  y += 36;
+      // Source slice in canvas pixels
+      const srcY = Math.round(yOffset / mmPerPx);
+      const sliceH = Math.min(pdfH / mmPerPx, canvasH - srcY);
 
-  // ── Section helper ───────────────────────────────────────────
-  const sectionTitle = (title: string) => {
-    doc.setFillColor(240, 249, 255);
-    doc.rect(margin, y, pw - margin * 2, 8, 'F');
-    doc.setTextColor(14, 116, 144);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.text(title, margin + 3, y + 5.5);
-    y += 12;
-  };
+      // Draw only that horizontal strip
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvasW;
+      sliceCanvas.height = Math.ceil(sliceH);
+      const ctx = sliceCanvas.getContext('2d')!;
+      ctx.drawImage(canvas, 0, srcY, canvasW, sliceH, 0, 0, canvasW, sliceH);
 
-  const row = (label: string, value: string, safe: boolean) => {
-    doc.setTextColor(60, 60, 60);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.text(label, margin + 4, y);
-    doc.setFont('helvetica', 'bold');
-    doc.text(value, margin + 70, y);
-    const statusColor = safe ? [34, 197, 94] : [239, 68, 68];
-    doc.setTextColor(statusColor[0] as number, statusColor[1] as number, statusColor[2] as number);
-    doc.text(safe ? '✓ Normal' : '⚠ Abnormal', margin + 120, y);
-    doc.setTextColor(60, 60, 60);
-    y += 7;
-  };
+      const sliceData = sliceCanvas.toDataURL('image/png');
+      const sliceHmm = sliceH * mmPerPx;
+      pdf.addImage(sliceData, 'PNG', 0, 0, pdfW, sliceHmm);
 
-  // ── Water Parameters ─────────────────────────────────────────
-  sectionTitle('Water Quality Parameters');
-  const p = prediction.parameters;
-  row('pH Level', `${p.ph.toFixed(2)} pH`, p.ph >= 6.5 && p.ph <= 8.5);
-  row('Dissolved Oxygen', `${p.dissolvedOxygen.toFixed(1)} mg/L`, p.dissolvedOxygen >= 6);
-  row('Turbidity', `${p.turbidity.toFixed(1)} NTU`, p.turbidity < 4);
-  row('Temperature', `${p.temperature.toFixed(1)} °C`, p.temperature < 30);
-  row('Rainfall', `${p.rainfall.toFixed(1)} mm/day`, p.rainfall < 10);
-  row('Coliform Count', `${p.coliform.toFixed(0)} CFU/100mL`, p.coliform < 5);
+      yOffset += pdfH;
+      pageNum++;
+    }
 
-  y += 4;
-
-  // ── Key Risk Factors ─────────────────────────────────────────
-  sectionTitle('Key Risk Factors');
-  prediction.keyFactors.forEach((f) => {
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.text(`•  ${f}`, margin + 4, y);
-    y += 7;
-  });
-
-  y += 4;
-
-  // ── Recommendations ──────────────────────────────────────────
-  sectionTitle('Recommendations');
-  prediction.recommendations.forEach((r, i) => {
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    const lines = doc.splitTextToSize(`${i + 1}.  ${r}`, pw - margin * 2 - 8);
-    doc.text(lines, margin + 4, y);
-    y += lines.length * 6 + 2;
-  });
-
-  y += 6;
-
-  // ── WQI bar ──────────────────────────────────────────────────
-  sectionTitle('Water Quality Index (WQI)');
-  const barW = pw - margin * 2 - 8;
-  const wqi = Math.min(prediction.waterQualityIndex, 100);
-  // background
-  doc.setFillColor(220, 220, 220);
-  doc.roundedRect(margin + 4, y, barW, 8, 3, 3, 'F');
-  // fill
-  const fillColor: [number, number, number] =
-    wqi >= 75 ? [34, 197, 94] : wqi >= 50 ? [245, 158, 11] : [239, 68, 68];
-  doc.setFillColor(...fillColor);
-  doc.roundedRect(margin + 4, y, (barW * wqi) / 100, 8, 3, 3, 'F');
-  doc.setTextColor(60, 60, 60);
-  doc.setFontSize(9);
-  doc.text(`WQI: ${wqi.toFixed(1)} / 100`, margin + 4, y + 14);
-  y += 22;
-
-  // ── Footer ───────────────────────────────────────────────────
-  doc.setFillColor(240, 249, 255);
-  doc.rect(0, ph - 14, pw, 14, 'F');
-  doc.setTextColor(100, 116, 139);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'italic');
-  doc.text(
-    'Generated by Water-Borne Disease Prediction System  |  For informational purposes only.',
-    pw / 2,
-    ph - 5,
-    { align: 'center' }
-  );
-
-  doc.save(`WBDPS_${city.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
+    pdf.save(`WBDPS_${city.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
+  } finally {
+    onDone?.();
+  }
 }

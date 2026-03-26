@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -6,12 +6,12 @@ import {
 } from 'recharts';
 import {
   Droplets, MapPin, RefreshCw, AlertTriangle,
-  Plus, Activity, Thermometer, CloudRain, Wind, Download
+  Plus, Activity, Thermometer, CloudRain, Wind, Download, Loader2
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { simulateWaterParameters, predictDisease, generate7DayHistory, PredictionResult } from '@/lib/predictionEngine';
-import { exportDashboardPDF } from '@/lib/exportPdf';
+import { exportDashboardVisualPDF } from '@/lib/exportPdf';
 import RiskGauge from '@/components/dashboard/RiskGauge';
 import CityHeatmap from '@/components/dashboard/CityHeatmap';
 
@@ -30,9 +30,11 @@ export default function Dashboard() {
   const [cityInput, setCityInput] = useState('');
   const [savedCities, setSavedCities] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   const [history, setHistory] = useState<ReturnType<typeof generate7DayHistory>>([]);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const dashboardRef = useRef<HTMLDivElement>(null);
 
   const runPrediction = (city: string) => {
     setLoading(true);
@@ -114,7 +116,7 @@ export default function Dashboard() {
   ] : [];
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
+    <div ref={dashboardRef} className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -128,13 +130,14 @@ export default function Dashboard() {
           </div>
           {prediction && (
             <button
-              onClick={() => exportDashboardPDF(selectedCity, prediction)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98]"
+              onClick={() => exportDashboardVisualPDF(dashboardRef, selectedCity, () => setExporting(true), () => setExporting(false))}
+              disabled={exporting}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
               style={{ background: 'hsl(var(--primary))' }}
-              title={`Export ${selectedCity} report as PDF`}
+              title={`Export ${selectedCity} dashboard as PDF`}
             >
-              <Download className="w-4 h-4" />
-              Export PDF
+              {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {exporting ? 'Exporting…' : 'Export PDF'}
             </button>
           )}
         </div>
